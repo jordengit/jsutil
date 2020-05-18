@@ -72,7 +72,6 @@
     });
 });
 
-
 if (!String.format) {
     String.format = function (format) {
         var args = Array.prototype.slice.call(arguments, 1);
@@ -84,6 +83,7 @@ if (!String.format) {
         });
     };
 }
+
 if (!Number.pad) {
     Number.prototype.pad = function (size) {
         var s = String(this);
@@ -91,3 +91,55 @@ if (!Number.pad) {
         return s;
     }
 }
+
+$(document).bind('ajaxSend', function (event, xhr) {
+    if (xhr.status == 401) {
+        alert('Session timeout!');
+        setTimeout(function () {
+            location.reload();
+        }, 2000);
+    }
+}).bind('ajaxError', function (event, xhr) {
+    if (xhr.status == 401) {
+        alert('Session timeout!');
+        setTimeout(function () {
+            location.reload();
+        }, 2000);
+    }
+});
+
+(function () {
+    window.onerror = function(errorMsg, url, lineNumber) {
+        var DTO = {
+            errorMsg: errorMsg,
+            url: url,
+            lineNumber: lineNumber
+        };
+
+        setTimeout(function(){
+            $.ajax({
+                url: serviceUrl,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(DTO),
+                complete: function () {
+                    alert('Message: ' + errorMsg + '\nUrl: ' + url + '\nLine: ' + lineNumber);
+                }
+            });
+        }, 50);
+    }
+})(window.onerror);
+
+(function () {
+    window.alert = function () {
+        try {
+            var totalErrorMessage = arguments[0];
+            var messageType = arguments[1];
+            var delayTime = arguments[2];            
+            var errors = totalErrorMessage.split(/(?:\r\n|\r|\n)/g);
+            if (errors[errors.length - 1] == '') errors.splice(-1, 1);
+        } catch(e) {
+            if (console !== null) console.error(e);
+        }
+    };
+})(window.alert);
